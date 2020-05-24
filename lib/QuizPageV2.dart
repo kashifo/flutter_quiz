@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterquiz/QuizBrain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 QuizBrain quizBrain = new QuizBrain();
 
@@ -9,26 +10,26 @@ class QuizPageV2 extends StatefulWidget {
 }
 
 class _QuizPageStateV2 extends State<QuizPageV2> {
-  int position = 0;
+  List<Widget> scoreKeeper = [];
 
   checkAnswer(bool isTrue) {
-    if (quizBrain.questionBank[position].answer == isTrue) {
-      scoreKeeper.add(Icon(
-        Icons.check,
-        color: Colors.lightGreenAccent,
-      ));
-    } else {
-      scoreKeeper.add(Icon(
-        Icons.close,
-        color: Colors.redAccent,
-      ));
-    }
+    setState(() {
+      if (quizBrain.getAnwser() == isTrue) {
+        scoreKeeper.add(Icon(
+          Icons.check,
+          color: Colors.lightGreenAccent,
+        ));
+      } else {
+        scoreKeeper.add(Icon(
+          Icons.close,
+          color: Colors.redAccent,
+        ));
+      }
 
-    if (position < quizBrain.questionBank.length) {
-      position++;
-    } else {
-      //todo: learn to hide views.
-    }
+      if (!quizBrain.nextQuestion()) {
+        showAlert();
+      }
+    });
   }
 
   @override
@@ -43,7 +44,7 @@ class _QuizPageStateV2 extends State<QuizPageV2> {
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                '$position / ${quizBrain.questionBank.length}',
+                '${quizBrain.questionNumber} / ${quizBrain.getNumOfQuestions()}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -59,7 +60,7 @@ class _QuizPageStateV2 extends State<QuizPageV2> {
             padding: EdgeInsets.all(12),
             child: Center(
               child: Text(
-                quizBrain.questionBank[position].question,
+                quizBrain.getQuestion(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -84,10 +85,7 @@ class _QuizPageStateV2 extends State<QuizPageV2> {
                 ),
               ),
               onPressed: () {
-                //The user picked true.
-                setState(() {
-                  checkAnswer(true);
-                });
+                checkAnswer(true);
               },
             ),
           ),
@@ -106,31 +104,49 @@ class _QuizPageStateV2 extends State<QuizPageV2> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
-                setState(() {
-                  checkAnswer(false);
-                });
+                checkAnswer(false);
               },
             ),
           ),
         ),
         Expanded(
             flex: 1,
-            child: ListView(
+            child: Row(
               children: scoreKeeper,
             )),
       ],
     );
   }
 
-  List<Widget> scoreKeeper = [
-    Icon(
-      Icons.check,
-      color: Colors.lightGreenAccent,
-    ),
-    Icon(
-      Icons.close,
-      color: Colors.redAccent,
-    )
-  ];
+  showAlert() {
+    Alert(
+      context: context,
+      type: AlertType.success,
+      title: "Completed",
+      desc: "You've successfully completed answering all the questions.",
+      closeFunction: () {
+        restartQuiz();
+      },
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Restart",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+            restartQuiz();
+          },
+          width: 120,
+        )
+      ],
+    ).show();
+  }
+
+  restartQuiz() {
+    setState(() {
+      quizBrain.questionNumber = 0;
+      scoreKeeper = [];
+    });
+  }
 }

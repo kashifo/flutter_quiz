@@ -1,7 +1,7 @@
 import 'Question.dart';
 
 class QuizBrain {
-  List<Question> questionBank = [
+  List<Question> _questionBank = [
     Question("Muhammad is the messenger of the God", true),
     Question("Quran was revealed on Ramadan", true),
     Question("You can lead a cow down stairs but not up stairs.", false),
@@ -31,4 +31,29 @@ class QuizBrain {
         'In West Virginia, USA, if you accidentally hit an animal with your car, you are free to take it home to eat.',
         true),
   ];
+
+  String getQuestion() {
+    if (questionNumber < _questionBank.length)
+      return _questionBank[questionNumber].question;
+  }
+
+  bool getAnwser() {
+    if (questionNumber < _questionBank.length)
+      return _questionBank[questionNumber].answer;
+  }
+
+  int questionNumber = 0;
+
+  bool nextQuestion() {
+    if (questionNumber < _questionBank.length - 1) {
+      questionNumber++;
+      return true;
+    }
+
+    return false;
+  }
+
+  int getNumOfQuestions() {
+    return _questionBank.length;
+  }
 }
